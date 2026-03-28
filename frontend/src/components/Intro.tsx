@@ -5,7 +5,6 @@ interface IntroProps {
 }
 
 const CYCLE_WORDS = [
-  { word: "Heard", color: "#7aad96" },
   { word: "Seen", color: "#7eb8d4" },
   { word: "Safe", color: "#d4956a" },
   { word: "Loved", color: "#c9849a" },
