@@ -1,0 +1,242 @@
+[
+    {
+        "id": 1,
+        "text": "How are you feeling emotionally right now?",
+        "options": [
+            {
+                "key": "joy",
+                "label": "Joyful",
+                "desc": "Feeling light and happy",
+                "bg": "#DCFCE7",
+                "icon": "🌸"
+            },
+            {
+                "key": "content",
+                "label": "Content",
+                "desc": "Calm and at peace",
+                "bg": "#D1FAE5",
+                "icon": "🌿"
+            },
+            {
+                "key": "numb",
+                "label": "Numb",
+                "desc": "Not much feeling either way",
+                "bg": "#F1F5F9",
+                "icon": "🌫️"
+            },
+            {
+                "key": "sad",
+                "label": "Sad",
+                "desc": "Low without clear reason",
+                "bg": "#E0F2FE",
+                "icon": "💧"
+            },
+            {
+                "key": "overwhelmed",
+                "label": "Overwhelmed",
+                "desc": "Too much at once",
+                "bg": "#EDE9FE",
+                "icon": "🌊"
+            },
+            {
+                "key": "hopeless",
+                "label": "Hopeless",
+                "desc": "Struggling to see forward",
+                "bg": "#E2E8F0",
+                "icon": "🌑"
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "text": "How did you sleep last night?",
+        "options": [
+            {
+                "key": "restful",
+                "label": "Restful",
+                "desc": "Woke up recovered",
+                "bg": "#CFFAFE",
+                "icon": "🌙"
+            },
+            {
+                "key": "interrupted",
+                "label": "Interrupted",
+                "desc": "Woke up multiple times",
+                "bg": "#FEF9C3",
+                "icon": "😶"
+            },
+            {
+                "key": "toolittle",
+                "label": "Too little",
+                "desc": "Less than 4 hours",
+                "bg": "#FEE2E2",
+                "icon": "😔"
+            },
+            {
+                "key": "toomuch",
+                "label": "Too much",
+                "desc": "Couldn't get out of bed",
+                "bg": "#EDE9FE",
+                "icon": "🛏️"
+            },
+            {
+                "key": "restless",
+                "label": "Restless",
+                "desc": "Anxious thoughts kept me up",
+                "bg": "#FCE7F3",
+                "icon": "💭"
+            },
+            {
+                "key": "nodidnt",
+                "label": "Didn't sleep",
+                "desc": "Barely slept at all",
+                "bg": "#E2E8F0",
+                "icon": "🌑"
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "text": "How connected do you feel to your baby?",
+        "options": [
+            {
+                "key": "bonded",
+                "label": "Deeply bonded",
+                "desc": "Loving and natural",
+                "bg": "#FEF9C3",
+                "icon": "💛"
+            },
+            {
+                "key": "growing",
+                "label": "Growing bond",
+                "desc": "Still getting to know each other",
+                "bg": "#DCFCE7",
+                "icon": "🌱"
+            },
+            {
+                "key": "motions",
+                "label": "Going through motions",
+                "desc": "Caring but not feeling it",
+                "bg": "#F1F5F9",
+                "icon": "🤲"
+            },
+            {
+                "key": "detached",
+                "label": "Detached",
+                "desc": "Feeling distant",
+                "bg": "#E0F2FE",
+                "icon": "🧊"
+            },
+            {
+                "key": "anxious",
+                "label": "Anxious",
+                "desc": "Worried about doing it wrong",
+                "bg": "#FEE2E2",
+                "icon": "😰"
+            },
+            {
+                "key": "resentful",
+                "label": "Conflicted",
+                "desc": "Struggling with hard feelings",
+                "bg": "#EDE9FE",
+                "icon": "🌪️"
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "text": "How has your body been feeling today?",
+        "options": [
+            {
+                "key": "recov",
+                "label": "Recovering well",
+                "desc": "Healing feels manageable",
+                "bg": "#FCE7F3",
+                "icon": "🌺"
+            },
+            {
+                "key": "tired",
+                "label": "Tired but okay",
+                "desc": "Fatigued but functional",
+                "bg": "#DCFCE7",
+                "icon": "🍃"
+            },
+            {
+                "key": "pain",
+                "label": "In pain",
+                "desc": "Physical discomfort is affecting me",
+                "bg": "#FEE2E2",
+                "icon": "🔥"
+            },
+            {
+                "key": "exhausted",
+                "label": "Exhausted",
+                "desc": "Running on empty",
+                "bg": "#F1F5F9",
+                "icon": "🪨"
+            },
+            {
+                "key": "tense",
+                "label": "Tense",
+                "desc": "Body feels tight and stressed",
+                "bg": "#FEF9C3",
+                "icon": "⚡"
+            },
+            {
+                "key": "discbody",
+                "label": "Disconnected",
+                "desc": "Can't feel my body properly",
+                "bg": "#EDE9FE",
+                "icon": "🫧"
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "text": "How supported do you feel by people around you?",
+        "options": [
+            {
+                "key": "vsup",
+                "label": "Very supported",
+                "desc": "Family and friends are present",
+                "bg": "#DCFCE7",
+                "icon": "🤝"
+            },
+            {
+                "key": "ssup",
+                "label": "Somewhat supported",
+                "desc": "Some help but could use more",
+                "bg": "#FEF9C3",
+                "icon": "🌤️"
+            },
+            {
+                "key": "alone",
+                "label": "Alone",
+                "desc": "Doing most of this myself",
+                "bg": "#E0F2FE",
+                "icon": "🏝️"
+            },
+            {
+                "key": "misund",
+                "label": "Misunderstood",
+                "desc": "People don't get what I feel",
+                "bg": "#EDE9FE",
+                "icon": "🌀"
+            },
+            {
+                "key": "judged",
+                "label": "Judged",
+                "desc": "Feeling watched or criticized",
+                "bg": "#FEE2E2",
+                "icon": "👁️"
+            },
+            {
+                "key": "invis",
+                "label": "Invisible",
+                "desc": "As if no one notices",
+                "bg": "#E2E8F0",
+                "icon": "🌑"
+            }
+        ]
+    }
+]
