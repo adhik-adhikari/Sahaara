@@ -1,7 +1,13 @@
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
-/** Onboarding should set this key to one of the stressor ids below (see `peerGroupForStressor`). */
+// ─── Constants ────────────────────────────────────────────────────────────────
+
 export const SAHAARA_ONBOARDING_STRESSOR_KEY = "sahaara_onboarding_stressor";
+
+const TOAST_DURATION_MS = 3200;
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type OnboardingStressorId =
   | "final_year"
@@ -26,6 +32,14 @@ interface PeerGroup {
   accent: string;
   communities: ExternalCommunity[];
 }
+
+interface SupportLink {
+  label: string;
+  description: string;
+  url: string;
+}
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
 const PEER_GROUPS: PeerGroup[] = [
   {
@@ -82,7 +96,15 @@ const PEER_GROUPS: PeerGroup[] = [
   },
 ];
 
-const SUPPORT_LINKS: { label: string; description: string; url: string }[] = [
+const STRESSOR_TO_GROUP_ID: Record<OnboardingStressorId, string> = {
+  final_year: "final-year",
+  job_seeking: "job-seekers",
+  early_career: "early-career",
+  burnout: "burnout-recovery",
+  general: "final-year",
+};
+
+const SUPPORT_LINKS: SupportLink[] = [
   {
     label: "988 Suicide & Crisis Lifeline",
     description: "Call or text 988 (US) — free, 24/7 crisis support.",
@@ -105,66 +127,158 @@ const SUPPORT_LINKS: { label: string; description: string; url: string }[] = [
   },
 ];
 
+const PLATFORM_BADGE: Record<Platform, { text: string; bg: string }> = {
+  reddit: { text: "Reddit", bg: "rgba(255,69,0,0.15)" },
+  facebook: { text: "Facebook", bg: "rgba(24,119,242,0.15)" },
+  discord: { text: "Discord", bg: "rgba(88,101,242,0.2)" },
+};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 function readStoredStressor(): OnboardingStressorId {
+  const VALID_IDS: OnboardingStressorId[] = [
+    "final_year",
+    "job_seeking",
+    "early_career",
+    "burnout",
+    "general",
+  ];
   try {
     const raw = localStorage.getItem(SAHAARA_ONBOARDING_STRESSOR_KEY);
-    if (
-      raw === "final_year" ||
-      raw === "job_seeking" ||
-      raw === "early_career" ||
-      raw === "burnout" ||
-      raw === "general"
-    ) {
-      return raw;
+    if (raw && VALID_IDS.includes(raw as OnboardingStressorId)) {
+      return raw as OnboardingStressorId;
     }
   } catch {
-    /* ignore */
+    // localStorage unavailable — fall through to default
   }
   return "general";
 }
 
-const STRESSOR_TO_GROUP_ID: Record<OnboardingStressorId, string> = {
-  final_year: "final-year",
-  job_seeking: "job-seekers",
-  early_career: "early-career",
-  burnout: "burnout-recovery",
-  general: "final-year",
-};
-
-function peerGroupForStressor(stressor: OnboardingStressorId): PeerGroup {
-  const id = STRESSOR_TO_GROUP_ID[stressor];
-  return PEER_GROUPS.find((g) => g.id === id) ?? PEER_GROUPS[0];
+function resolveRecommendedGroup(stressor: OnboardingStressorId): PeerGroup {
+  const targetId = STRESSOR_TO_GROUP_ID[stressor];
+  return PEER_GROUPS.find((g) => g.id === targetId) ?? PEER_GROUPS[0];
 }
 
-function formatMembers(n: number): string {
-  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k members`;
-  return `${n} members`;
+function formatMemberCount(n: number): string {
+  return n >= 1000
+    ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")}k members`
+    : `${n} members`;
 }
 
-function platformBadge(platform: Platform): { text: string; bg: string } {
-  switch (platform) {
-    case "reddit":
-      return { text: "Reddit", bg: "rgba(255,69,0,0.15)" };
-    case "facebook":
-      return { text: "Facebook", bg: "rgba(24,119,242,0.15)" };
-    case "discord":
-      return { text: "Discord", bg: "rgba(88,101,242,0.2)" };
-    default:
-      return { text: platform, bg: "rgba(255,255,255,0.08)" };
-  }
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+interface CommunityLinkProps {
+  community: ExternalCommunity;
+  compact?: boolean;
 }
+
+function CommunityLink({ community, compact = false }: CommunityLinkProps) {
+  const badge = PLATFORM_BADGE[community.platform];
+  return (
+    <a
+      href={community.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      data-interactive
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: compact ? "0.35rem" : "0.4rem",
+        padding: compact ? "0.4rem 0.75rem" : "0.45rem 0.85rem",
+        borderRadius: compact ? 8 : 10,
+        background: badge.bg,
+        color: "var(--cream)",
+        textDecoration: "none",
+        fontSize: compact ? "0.74rem" : "0.78rem",
+        border: "1px solid var(--border)",
+      }}
+    >
+      {compact ? (
+        <>{badge.text} · {community.label} ↗</>
+      ) : (
+        <>
+          <span style={{ opacity: 0.85 }}>{badge.text}</span>
+          <span style={{ color: "var(--mist)" }}>{community.label}</span>
+          <span style={{ fontSize: "0.7rem", opacity: 0.6 }}>↗</span>
+        </>
+      )}
+    </a>
+  );
+}
+
+interface JoinButtonProps {
+  joined: boolean;
+  onJoin: () => void;
+  size?: "sm" | "md";
+}
+
+function JoinButton({ joined, onJoin, size = "md" }: JoinButtonProps) {
+  const isSm = size === "sm";
+  return (
+    <button
+      type="button"
+      data-interactive
+      disabled={joined}
+      onClick={() => !joined && onJoin()}
+      style={{
+        alignSelf: "center",
+        padding: isSm ? "0.55rem 1.2rem" : "0.65rem 1.4rem",
+        borderRadius: 100,
+        border: joined
+          ? "1px solid rgba(77,208,164,0.35)"
+          : `1px solid ${isSm ? "var(--border)" : "rgba(126,184,212,0.35)"}`,
+        background: joined
+          ? "rgba(77,208,164,0.1)"
+          : isSm ? "transparent" : "rgba(126,184,212,0.12)",
+        color: joined ? "var(--sage)" : isSm ? "var(--mist)" : "var(--glow)",
+        fontFamily: "'Syne', sans-serif",
+        fontSize: isSm ? "0.65rem" : "0.68rem",
+        fontWeight: 600,
+        letterSpacing: isSm ? "0.1em" : "0.12em",
+        textTransform: "uppercase",
+        cursor: joined ? "default" : "pointer",
+      }}
+    >
+      {joined ? "Joined" : "Join"}
+    </button>
+  );
+}
+
+interface SectionHeadingProps {
+  children: React.ReactNode;
+}
+
+function SectionHeading({ children }: SectionHeadingProps) {
+  return (
+    <h2
+      style={{
+        fontFamily: "'Syne', sans-serif",
+        fontSize: "0.72rem",
+        fontWeight: 600,
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        color: "var(--muted)",
+        marginBottom: "1rem",
+      }}
+    >
+      {children}
+    </h2>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function CommunityPage() {
-  const stressor = useMemo(() => readStoredStressor(), []);
-  const [joinedIds, setJoinedIds] = useState<Set<string>>(() => new Set());
+  const stressor = useMemo(readStoredStressor, []);
+  const recommended = useMemo(() => resolveRecommendedGroup(stressor), [stressor]);
+
+  const [joinedIds, setJoinedIds] = useState<Set<string>>(new Set);
   const [toast, setToast] = useState<string | null>(null);
 
-  const recommended = useMemo(() => peerGroupForStressor(stressor), [stressor]);
-
-  const join = useCallback((id: string, title: string) => {
+  const handleJoin = useCallback((id: string, title: string) => {
     setJoinedIds((prev) => new Set(prev).add(id));
     setToast(`You're in — welcome to ${title}.`);
-    window.setTimeout(() => setToast(null), 3200);
+    window.setTimeout(() => setToast(null), TOAST_DURATION_MS);
   }, []);
 
   const cardBase: React.CSSProperties = {
@@ -183,10 +297,10 @@ export default function CommunityPage() {
         maxWidth: 900,
         margin: "0 auto",
         fontFamily: "'DM Sans', sans-serif",
-        /* Hex + vars: avoids “invisible” text if :root vars fail to apply under some stacks */
         color: "var(--cream, #f0ebe3)",
       }}
     >
+      {/* Toast notification */}
       {toast && (
         <div
           role="status"
@@ -210,9 +324,10 @@ export default function CommunityPage() {
         </div>
       )}
 
+      {/* Page header */}
       <header style={{ marginBottom: "2.25rem" }}>
-        <a
-          href="/"
+        <Link
+          to="/"
           data-interactive
           style={{
             display: "inline-block",
@@ -222,24 +337,13 @@ export default function CommunityPage() {
             letterSpacing: "0.06em",
             marginBottom: "1rem",
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "var(--glow)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "var(--muted)";
-          }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--glow)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--muted)"; }}
         >
-          ← Mood check-in
-        </a>
-        <p
-          style={{
-            fontSize: "0.68rem",
-            letterSpacing: "0.22em",
-            textTransform: "uppercase",
-            color: "var(--glow)",
-            marginBottom: "0.6rem",
-          }}
-        >
+          ← Back
+        </Link>
+
+        <p style={{ fontSize: "0.68rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--glow)", marginBottom: "0.6rem" }}>
           Community
         </p>
         <h1
@@ -261,21 +365,9 @@ export default function CommunityPage() {
         </p>
       </header>
 
-      {/* FR-31 Recommended */}
+      {/* Recommended group */}
       <section style={{ marginBottom: "2.5rem" }}>
-        <h2
-          style={{
-            fontFamily: "'Syne', sans-serif",
-            fontSize: "0.72rem",
-            fontWeight: 600,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-            marginBottom: "1rem",
-          }}
-        >
-          Recommended for you
-        </h2>
+        <SectionHeading>Recommended for you</SectionHeading>
         <div
           style={{
             ...cardBase,
@@ -300,185 +392,80 @@ export default function CommunityPage() {
               <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.45rem", fontWeight: 600, marginBottom: "0.4rem" }}>
                 {recommended.title}
               </h3>
-              <p style={{ color: "var(--mist)", fontSize: "0.88rem", lineHeight: 1.6 }}>{recommended.description}</p>
+              <p style={{ color: "var(--mist)", fontSize: "0.88rem", lineHeight: 1.6 }}>
+                {recommended.description}
+              </p>
               <p style={{ marginTop: "0.75rem", fontSize: "0.78rem", color: "var(--muted)" }}>
-                {formatMembers(recommended.memberCount)} · mock count for demo
+                {formatMemberCount(recommended.memberCount)} · mock count for demo
               </p>
             </div>
-            <button
-              type="button"
-              data-interactive
-              disabled={joinedIds.has(recommended.id)}
-              onClick={() => !joinedIds.has(recommended.id) && join(recommended.id, recommended.title)}
-              style={{
-                alignSelf: "center",
-                padding: "0.65rem 1.4rem",
-                borderRadius: 100,
-                border: joinedIds.has(recommended.id) ? "1px solid rgba(77,208,164,0.35)" : "1px solid rgba(126,184,212,0.35)",
-                background: joinedIds.has(recommended.id) ? "rgba(77,208,164,0.12)" : "rgba(126,184,212,0.12)",
-                color: joinedIds.has(recommended.id) ? "var(--sage)" : "var(--glow)",
-                fontFamily: "'Syne', sans-serif",
-                fontSize: "0.68rem",
-                fontWeight: 600,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                cursor: joinedIds.has(recommended.id) ? "default" : "pointer",
-              }}
-            >
-              {joinedIds.has(recommended.id) ? "Joined" : "Join"}
-            </button>
+            <JoinButton
+              joined={joinedIds.has(recommended.id)}
+              onJoin={() => handleJoin(recommended.id, recommended.title)}
+            />
           </div>
+
           <div style={{ marginTop: "1.15rem", paddingTop: "1.15rem", borderTop: "1px solid var(--border)" }}>
             <p style={{ fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--muted)", marginBottom: "0.65rem" }}>
               External communities
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-              {recommended.communities.map((c) => {
-                const b = platformBadge(c.platform);
-                return (
-                  <a
-                    key={`${recommended.id}-${c.platform}`}
-                    href={c.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-interactive
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "0.4rem",
-                      padding: "0.45rem 0.85rem",
-                      borderRadius: 10,
-                      background: b.bg,
-                      color: "var(--cream)",
-                      textDecoration: "none",
-                      fontSize: "0.78rem",
-                      border: "1px solid var(--border)",
-                    }}
-                  >
-                    <span style={{ opacity: 0.85 }}>{b.text}</span>
-                    <span style={{ color: "var(--mist)" }}>{c.label}</span>
-                    <span style={{ fontSize: "0.7rem", opacity: 0.6 }}>↗</span>
-                  </a>
-                );
-              })}
+              {recommended.communities.map((c) => (
+                <CommunityLink key={`${recommended.id}-${c.platform}`} community={c} />
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* FR-28–30 All groups */}
+      {/* All peer groups */}
       <section style={{ marginBottom: "2.5rem" }}>
-        <h2
-          style={{
-            fontFamily: "'Syne', sans-serif",
-            fontSize: "0.72rem",
-            fontWeight: 600,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-            marginBottom: "1rem",
-          }}
-        >
-          All peer groups
-        </h2>
+        <SectionHeading>All peer groups</SectionHeading>
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          {PEER_GROUPS.map((g) => (
+          {PEER_GROUPS.map((group) => (
             <article
-              key={g.id}
-              style={{
-                ...cardBase,
-                borderLeft: `3px solid ${g.accent}`,
-              }}
+              key={group.id}
+              style={{ ...cardBase, borderLeft: `3px solid ${group.accent}` }}
             >
               <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
                 <div style={{ flex: "1 1 240px" }}>
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.25rem", fontWeight: 600, marginBottom: "0.35rem" }}>
-                    {g.title}
+                    {group.title}
                   </h3>
-                  <p style={{ color: "var(--mist)", fontSize: "0.86rem", lineHeight: 1.6 }}>{g.description}</p>
+                  <p style={{ color: "var(--mist)", fontSize: "0.86rem", lineHeight: 1.6 }}>
+                    {group.description}
+                  </p>
                   <p style={{ marginTop: "0.65rem", fontSize: "0.78rem", color: "var(--muted)" }}>
-                    {formatMembers(g.memberCount)}
+                    {formatMemberCount(group.memberCount)}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  data-interactive
-                  disabled={joinedIds.has(g.id)}
-                  onClick={() => !joinedIds.has(g.id) && join(g.id, g.title)}
-                  style={{
-                    alignSelf: "center",
-                    padding: "0.55rem 1.2rem",
-                    borderRadius: 100,
-                    border: joinedIds.has(g.id) ? "1px solid rgba(77,208,164,0.35)" : "1px solid var(--border)",
-                    background: joinedIds.has(g.id) ? "rgba(77,208,164,0.1)" : "transparent",
-                    color: joinedIds.has(g.id) ? "var(--sage)" : "var(--mist)",
-                    fontFamily: "'Syne', sans-serif",
-                    fontSize: "0.65rem",
-                    fontWeight: 600,
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                    cursor: joinedIds.has(g.id) ? "default" : "pointer",
-                  }}
-                >
-                  {joinedIds.has(g.id) ? "Joined" : "Join"}
-                </button>
+                <JoinButton
+                  size="sm"
+                  joined={joinedIds.has(group.id)}
+                  onJoin={() => handleJoin(group.id, group.title)}
+                />
               </div>
               <div style={{ marginTop: "1rem", display: "flex", flexWrap: "wrap", gap: "0.45rem" }}>
-                {g.communities.map((c) => {
-                  const b = platformBadge(c.platform);
-                  return (
-                    <a
-                      key={`${g.id}-${c.platform}`}
-                      href={c.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      data-interactive
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "0.35rem",
-                        padding: "0.4rem 0.75rem",
-                        borderRadius: 8,
-                        background: b.bg,
-                        color: "var(--cream)",
-                        textDecoration: "none",
-                        fontSize: "0.74rem",
-                        border: "1px solid var(--border)",
-                      }}
-                    >
-                      {b.text} · {c.label} ↗
-                    </a>
-                  );
-                })}
+                {group.communities.map((c) => (
+                  <CommunityLink key={`${group.id}-${c.platform}`} community={c} compact />
+                ))}
               </div>
             </article>
           ))}
         </div>
       </section>
 
-      {/* Support links */}
+      {/* Crisis support links */}
       <section>
-        <h2
-          style={{
-            fontFamily: "'Syne', sans-serif",
-            fontSize: "0.72rem",
-            fontWeight: 600,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--muted)",
-            marginBottom: "1rem",
-          }}
-        >
-          If you need immediate support
-        </h2>
+        <SectionHeading>If you need immediate support</SectionHeading>
         <p style={{ color: "var(--mist)", fontSize: "0.85rem", lineHeight: 1.65, marginBottom: "1rem" }}>
           These are independent resources. Use them if you or someone you know is in crisis or needs professional help.
         </p>
         <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-          {SUPPORT_LINKS.map((s) => (
-            <li key={s.url}>
+          {SUPPORT_LINKS.map((link) => (
+            <li key={link.url}>
               <a
-                href={s.url}
+                href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 data-interactive
@@ -493,9 +480,11 @@ export default function CommunityPage() {
                   transition: "border-color 0.2s",
                 }}
               >
-                <span style={{ color: "var(--glow)", fontSize: "0.88rem", fontWeight: 500 }}>{s.label}</span>
+                <span style={{ color: "var(--glow)", fontSize: "0.88rem", fontWeight: 500 }}>
+                  {link.label}
+                </span>
                 <span style={{ display: "block", marginTop: "0.35rem", fontSize: "0.8rem", color: "var(--mist)", lineHeight: 1.5 }}>
-                  {s.description}
+                  {link.description}
                 </span>
               </a>
             </li>

@@ -1,5 +1,7 @@
 import { UserButton, useUser, useClerk } from "@clerk/clerk-react";
 import { useEffect } from "react";
+import { Link } from "react-router-dom";
+
 
 export default function Navbar() {
   const { user } = useUser();
@@ -30,17 +32,33 @@ export default function Navbar() {
 
       <div style={{ display: "flex", gap: "2rem" }}>
         {["Community", "Sessions", "Journal", "Resources"].map(link => (
-          <a key={link} href={link === "Community" ? "/community" : "#"} data-interactive style={{
-            fontFamily: "'DM Sans', sans-serif", fontSize: "0.72rem",
-            letterSpacing: "0.12em", textTransform: "uppercase",
-            color: "var(--muted)", textDecoration: "none",
-            cursor: "none", transition: "color 0.2s",
-          }}
+          <Link
+            key={link}
+            to={
+              link === "Community"
+                ? "/community"
+                : link === "Sessions"
+                  ? "/sessions"
+                  : link === "Journal"
+                    ? "/journal"
+                    : "/resources"
+            }
+            data-interactive
+            style={{
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "0.72rem",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "var(--muted)",
+              textDecoration: "none",
+              cursor: "pointer", // change from "none" to pointer
+              transition: "color 0.2s",
+            }}
             onMouseEnter={e => (e.currentTarget.style.color = "var(--cream)")}
             onMouseLeave={e => (e.currentTarget.style.color = "var(--muted)")}
           >
             {link}
-          </a>
+          </Link>
         ))}
       </div>
 

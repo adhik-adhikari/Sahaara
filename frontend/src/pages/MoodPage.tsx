@@ -138,7 +138,7 @@ export default function MoodPage() {
         {/* Header */}
         <div style={{ marginBottom: 36 }}>
           <div style={{ fontSize: 11, letterSpacing: "0.1em", color: "#888", textTransform: "uppercase", marginBottom: 8 }}>
-            Aama · Mood check-in
+            Welcome TO Mood Check-in
           </div>
           <h1 style={{ fontSize: 26, fontWeight: 600, color: "#fff", lineHeight: 1.3 }}>
             How are you feeling today?

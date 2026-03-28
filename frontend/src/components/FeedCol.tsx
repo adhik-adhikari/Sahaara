@@ -3,7 +3,7 @@ import { Post } from "../types";
 import { USERS, MESSAGES, TAGS, REACTIONS } from "../lib/data";
 import { rand, ri } from "../lib/utils";
 import NotifCard from "./NotifCard";
-import { useRequireAuth } from "../hooks/useReuireAuth";
+import { useRequireAuth } from "../hooks/useRequireAuth";
 
 interface HistoryItem {
   id: number;

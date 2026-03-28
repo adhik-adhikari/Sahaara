@@ -1,29 +1,7 @@
 export const globalCSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700&display=swap');
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --bg:      #080b12;
-  --surface: #0f1219;
-  --card:    #161922;
-  --border:  rgba(255,255,255,0.07);
-  --cream:   #f0ebe3;
-  --mist:    #a8b8cc;
-  --glow:    #7eb8d4;
-  --sage:    #7aad96;
-  --amber:   #d4956a;
-  --rose:    #c9849a;
-  --violet:  #a78bfa;
-  --muted:   #5a6278;
-}
-
-html, body, #root {
-  width: 100%; height: 100%;
-  background: var(--bg);
-  font-family: 'DM Sans', sans-serif;
-  color: var(--cream);
-}
 
 body {
   overflow: hidden;
