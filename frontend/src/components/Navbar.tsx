@@ -30,7 +30,7 @@ export default function Navbar() {
 
       <div style={{ display: "flex", gap: "2rem" }}>
         {["Community", "Sessions", "Journal", "Resources"].map(link => (
-          <a key={link} href="#" data-interactive style={{
+          <a key={link} href={link === "Community" ? "/community" : "#"} data-interactive style={{
             fontFamily: "'DM Sans', sans-serif", fontSize: "0.72rem",
             letterSpacing: "0.12em", textTransform: "uppercase",
             color: "var(--muted)", textDecoration: "none",
