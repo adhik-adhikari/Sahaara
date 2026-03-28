@@ -63,7 +63,7 @@ export default function App() {
       <Cursor />
 
       {/* This wrapper gives all page content a stacking context ABOVE the canvas */}
-      <div style={{ position: "relative", zIndex: 1, minHeight: "100vh" }}>
+      <div id="app-scroll" style={{ position: "relative", zIndex: 1 }}>
         {!isSignedIn && !introComplete && (
           <Intro onComplete={handleIntroComplete} />
         )}

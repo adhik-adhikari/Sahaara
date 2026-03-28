@@ -1,5 +1,4 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -326,23 +325,6 @@ export default function CommunityPage() {
 
       {/* Page header */}
       <header style={{ marginBottom: "2.25rem" }}>
-        <Link
-          to="/"
-          data-interactive
-          style={{
-            display: "inline-block",
-            fontSize: "0.72rem",
-            color: "var(--muted)",
-            textDecoration: "none",
-            letterSpacing: "0.06em",
-            marginBottom: "1rem",
-          }}
-          onMouseEnter={(e) => { e.currentTarget.style.color = "var(--glow)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--muted)"; }}
-        >
-          ← Back
-        </Link>
-
         <p style={{ fontSize: "0.68rem", letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--glow)", marginBottom: "0.6rem" }}>
           Community
         </p>
