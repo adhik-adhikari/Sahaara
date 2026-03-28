@@ -1,5 +1,9 @@
 """Static mock payloads for Sahaara demo APIs."""
 
+from __future__ import annotations
+
+from datetime import datetime
+
 CHECK_IN_QUESTIONS = [
     {
         "id": "sleep",
@@ -165,3 +169,60 @@ def tier_message(tier: str) -> str:
         "red": "If you might hurt yourself or are in immediate danger, please use crisis resources now. You deserve support.",
     }
     return messages.get(tier, messages["green"])
+
+
+# ── DB seed rows (journal_entries + mood_check_ins) ─────────────────
+
+
+def _dt(iso: str) -> datetime:
+    return datetime.fromisoformat(iso.replace("Z", "+00:00"))
+
+
+# Stable string IDs so re-seeding upserts the same rows.
+MOCK_JOURNAL_SEED = [
+    {
+        "id": "mock_seed_j1",
+        "text": "Grateful for quiet morning tea and a full night of sleep.",
+        "mood": "Grateful",
+        "mood_icon": "🙏",
+        "mood_color": "#7aad96",
+        "prompt": "What are three things you're grateful for today?",
+        "created_at": _dt("2026-03-26T08:15:00Z"),
+    },
+    {
+        "id": "mock_seed_j2",
+        "text": "Exam week is heavy but I reached out to a friend. Small win.",
+        "mood": "Hopeful",
+        "mood_icon": "🌱",
+        "mood_color": "#34d399",
+        "prompt": None,
+        "created_at": _dt("2026-03-27T19:40:00Z"),
+    },
+    {
+        "id": "mock_seed_j3",
+        "text": "Naming that I feel anxious without judging myself for it.",
+        "mood": "Anxious",
+        "mood_icon": "😟",
+        "mood_color": "#6c8ef5",
+        "prompt": "What emotion are you sitting with right now, and why?",
+        "created_at": _dt("2026-03-28T11:05:00Z"),
+    },
+]
+
+
+def _mood_checkin_row(answers: dict, tier: str) -> dict:
+    return {
+        "answers": answers,
+        "result_label": f"{tier.title()} tier",
+        "result_level": {"green": "success", "yellow": "warning", "orange": "warning", "red": "danger"}.get(
+            tier, "success"
+        ),
+        "result_message": tier_message(tier),
+    }
+
+
+MOCK_MOOD_SEED = [
+    _mood_checkin_row({"sleep": "4", "stress": "2", "pressure": "2", "hope": "5"}, "green"),
+    _mood_checkin_row({"sleep": "2", "stress": "4", "pressure": "4", "hope": "3"}, "yellow"),
+    _mood_checkin_row({"sleep": "1", "stress": "5", "pressure": "5", "hope": "2"}, "orange"),
+]
